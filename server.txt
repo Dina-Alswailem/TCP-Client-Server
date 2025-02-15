@@ -1,0 +1,148 @@
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.StringTokenizer;
+
+public class Server {
+	static boolean  num =true , lett = true;
+	static String number, letter;
+	static int numberVal;
+
+
+
+    public static void main(String[] args) {
+    	
+        try {
+        	//valriable names can be changed
+            ServerSocket welcomeSocket = new ServerSocket(9999); // Server socket listening on port 9999
+
+            System.out.println("Server is running and listening for connections...");
+
+            Socket clientSocket = welcomeSocket.accept(); // Wait for a client to connect
+
+           
+
+            // Read data from the client
+            BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            
+         // Write data to the client ( can be changed to print writer )
+            DataOutputStream outToClient = new DataOutputStream(clientSocket.getOutputStream());
+
+
+            //Read Client Request
+            String request = reader.readLine();//B or H or Q
+                       
+            StringTokenizer token = new StringTokenizer(request);//split data according to spaces
+            if (token.hasMoreTokens()) {
+
+             letter = token.nextToken();//read Letter
+             
+             if( letter.trim().equalsIgnoreCase("B") || letter.trim().equalsIgnoreCase("H") ) {
+            	 
+            	 if(token.hasMoreTokens()) {
+            	 number = token.nextToken();//Read number
+
+                 if(number == null || number.isEmpty()) {
+
+                 	num = false;
+                 	
+
+                 }
+            	
+             }
+             }
+             
+             else {
+             
+
+              	lett = false;
+              
+              	
+             
+             }
+            }
+            else {
+            
+            lett = false;
+          	num = false;
+            }
+            
+            //Empty Request
+            if (num == false  && lett == false) {
+            	
+            	String result = "500 Request is empty";
+            	outToClient.writeBytes(result + '\n');
+            	
+            }
+            
+            //Empty Letter
+            else if (num == true  && lett == false) {
+            	
+            	
+               	String result = "300 Bad request";
+               	outToClient.writeBytes(result + '\n'); //to change code
+               
+            	
+            }
+            
+            //Empty number
+            else if (num == false  && lett == true) {
+            	
+
+             	String result = "400 The number is missing";
+             	outToClient.writeBytes(result + '\n');
+               
+            	
+            }
+            //Good Request
+            else if (num == true  && lett == true) {
+            	
+            	            	
+           try {
+            numberVal = Integer.parseInt(number);
+           
+
+            if( letter.equalsIgnoreCase("B") ) {
+            	
+            	String binary_Val = Convert2Binary(numberVal);
+            	String result = "200" +" " + binary_Val ;
+            	 outToClient.writeBytes(result + '\n');
+            }
+            else if(letter.equalsIgnoreCase("H") ) {
+            	String hex_Val = Convert2Hex(numberVal);
+            	String result = "200" +" " + hex_Val ;
+            	outToClient.writeBytes(result + '\n');
+            }
+            
+           }//end try
+           catch(NumberFormatException ex) {
+        	   String result = "400 The number is missing";
+           		outToClient.writeBytes(result + '\n');
+           }
+            
+         
+            }//end if true & true
+
+        }//end try
+        catch (IOException e) {
+           
+        }//end catch
+    }//end main
+    
+
+    
+   public static String Convert2Binary(int numberVal) {
+    	String result =  "( "+ Integer.toBinaryString(numberVal)+" )"+ "b";
+	   return result ;
+    }
+   
+   public static String Convert2Hex(int numberVal) {
+	   String result =  "( "+ Integer.toHexString(numberVal).toUpperCase()+" )"+ "H";
+		   return result ;
+   	
+   }
+}//end class
+

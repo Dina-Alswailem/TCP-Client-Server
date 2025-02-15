@@ -1,0 +1,87 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
+public class Client {
+
+    public static void main(String[] args) {
+    	
+        try {
+        	//Port# can be changed
+            Socket socket = new Socket("localhost", 9999); // Connect to the server on localhost and port 9999
+
+            // Write data to the server
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+
+            // Read input from the user and send it to the server
+            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+            
+         // Read result from the server
+            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            
+            
+           
+
+            //Echo Messeage to client
+            System.out.println("Please Choose your Option Letter: \r\n"
+            		+ "B: to convert to binary\r\n"
+            		+ "H: to convert to hexadecimal\r\n"
+            		+ "Q: to quit the client program");  
+            
+         //read from user
+           String letter = userInput.readLine();
+         
+        	  
+        
+            
+            if (letter.equalsIgnoreCase("Q")) {
+            	 writer.println(letter); //send to server Q
+            	 
+                 // Close resources
+                 System.out.println("Connection is Closed..");
+                 writer.close();
+                 userInput.close();
+                 socket.close();
+                
+            }
+            
+            else {
+            	
+            	System.out.println("Please Write the number to be converted." );
+                String number = userInput.readLine();  
+                String request = letter + " " + number ;   //send request to server [ letter number ]             
+                writer.println(request);//Send to server
+                
+                //Read Response from Server
+    			String response = inFromServer.readLine();
+    			
+                String[] parts = response.split(" ", 2);
+
+                int code = Integer.parseInt(parts[0]);
+                if (code == 200) {
+                    System.out.println("Server Response: " + parts[1]);
+                } else {
+                	if (parts[1].equalsIgnoreCase("Bad request"))
+                    System.err.println("Server error: " + "Missing B or H" );
+                	
+                	else {
+                		System.err.println("Server Error: " + parts[1] );
+                		
+                	}
+                    
+                }
+    			
+            	
+            }
+            
+         
+
+  
+        }//end try
+        catch (Exception e) {
+           System.err.println("Server is down, please try later!");
+        }
+    }//end main
+}//end class
